@@ -90,6 +90,7 @@ module GtnLinter
   end
 
   def self.fix_file(path)
+	@path = path
 	handle = File.open(path)
 	contents = handle.read.split("\n")
 	results = fix(contents)
