@@ -28,13 +28,3 @@ contributors:
 
 # Introduction
 {:.no_toc}
-
-{: .no_toc}
-
-
-<div class="embed-responsive embed-responsive-16by9"><iframe src="https://www.youtube.com/embed/FAGobvUGl24" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></div>
-
-
-asdf testing [this link](https://training.galaxyproject.org/training-material/topics/admin/tutorials/ansible-galaxy/tutorial.html)
-
-asdf testing [this older link](https://galaxyproject.github.io/training-material/topics/admin/tutorials/ansible-galaxy/tutorial.html)
