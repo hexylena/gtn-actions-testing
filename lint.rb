@@ -14,15 +14,15 @@ module ReviewDogEmitter
 		'location' => {
 			'path' => path,
 			'range' => {
-				'start' => { "text" => idx, "column" => match_start },
-				'end' => { "text" => idx, "column" => match_end },
+				'start' => { "line" => idx, "column" => match_start },
+				'end' => { "line" => idx, "column" => match_end },
 			}
 		},
 		'suggestions' => [{
 			'text' => replacement,
 			'range' => {
-				'start' => { "text" => idx, "column" => match_start },
-				'end' => { "text" => idx, "column" => match_end },
+				'start' => { "line" => idx, "column" => match_start },
+				'end' => { "line" => idx, "column" => match_end },
 			}
 		}],
 		"severity" => level 
