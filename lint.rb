@@ -39,6 +39,7 @@ module ReviewDogEmitter
 end
 
 module GtnLinter
+	@BAD_TOOL_LINK = /{% tool (\[[^\]]*\])\(https?.*tool_id=([^)]*)\)\s*%}/i
 
   def self.find_matching_texts(contents, query)
 	contents.map.with_index { |text, idx|
@@ -162,10 +163,8 @@ module GtnLinter
 
   # GTN:E:007 Bad tool link
   def self.bad_tool_links(contents)
-	# self.find_matching_texts(contents, /{% tool (\[([^\]]*\])(https.*?tool_id)(.*)\) %}/i)
-	self.find_matching_texts(contents, /{% tool (\[[^\]]*\])\(https?.*tool_id=([^)]*)\)\s*%}/i)
+	self.find_matching_texts(contents, @BAD_TOOL_LINK)
 	.map { |idx, text, selected |
-		puts "#{selected}"
 		ReviewDogEmitter.warning(
 			@path, idx, selected.begin(0), selected.end(0),
 			"{% tool #{selected[1]}(#{selected[2]}) %}",
@@ -174,22 +173,24 @@ module GtnLinter
 	}
   end
 
+  # GTN:W:008 Used TestToolShed Links
+
 
   def self.fix_md(contents)
 	[
-		# *fix_notoc(contents),
-		# *youtube_bad(contents),
-		# *link_gtn_slides_external(contents),
-		# *link_gtn_tutorial_external(contents),
-		# *check_dois(contents),
-		# *check_bad_link_text(contents),
-		# *incorrect_calls(contents),
-		# *non_existent_snippet(contents),
+		*fix_notoc(contents),
+		*youtube_bad(contents),
+		*link_gtn_slides_external(contents),
+		*link_gtn_tutorial_external(contents),
+		*check_dois(contents),
+		*check_bad_link_text(contents),
+		*incorrect_calls(contents),
+		*non_existent_snippet(contents),
 		*bad_tool_links(contents),
 	]
   end
 
-  def self.bib_missing_doi_and_url(bib)
+  def self.bib_missing_mandatory_fields(bib)
 	results = []
 	for x in bib
 		begin
@@ -205,29 +206,34 @@ module GtnLinter
 		end
 
 		if doi.nil? && url.nil?
-			results.push(x.key)
+			results.push([x.key, "Missing both a DOI and a URL. Please add one of the two."])
+		end
+
+		begin
+			x.title
+			if ! x.title
+				results.push([x.key, "This entry is missing a title attribute. Please add it."])
+			end
+		rescue
+			results.push([x.key, "This entry is missing a title attribute. Please add it."])
 		end
 	end
 	return results
   end
 
   def self.fix_bib(contents, bib)
-	bad_keys = bib_missing_doi_and_url(bib).map{|x| ".*{#{x}"}
-	if bad_keys.length > 1
-		bad_query = "^@(" + bad_keys.join("|") + ")"
-	elsif bad_keys.length == 1
-		bad_query = "^@" + bad_keys[0]
-	else
-		[]
-	end
-
-	self.find_matching_texts(contents, /#{bad_query}/)
-	.map { |idx, text, selected |
-		ReviewDogEmitter.warning(
-			@path, idx, 0, text.length, nil,
-			"This bibtex entry is missing both DOI and URLs. Please try and add one of those."
-		)
+	bad_keys = bib_missing_mandatory_fields(bib)
+	results = []
+	bad_keys.each{|key, reason|
+		results += self.find_matching_texts(contents, /^\s*@.*{#{key},/)
+		.map { |idx, text, selected |
+			ReviewDogEmitter.warning(
+				@path, idx, 0, text.length, nil,
+				reason
+			)
+		}
 	}
+	results
   end
 
   def self.fix_file(path)
