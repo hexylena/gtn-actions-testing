@@ -66,3 +66,5 @@ This "exists" {% snippet bad.md %}
 > ### {% icon tip %} Tip: Blah
 > asdf
 {: .tip}
+
+[here](google.com){: target="_blank"}

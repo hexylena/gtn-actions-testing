@@ -94,7 +94,7 @@ module GtnLinter
 
   # GTN:E:004 useless link text
   def self.check_bad_link_text(contents)
-	self.find_matching_texts(contents, /\[\s*here\s*\]/i)
+	self.find_matching_texts(contents, /\[\s*(here|link)\s*\]/i)
 	.map { |idx, text, selected |
 		ReviewDogEmitter.warning(
 			@path, idx, selected.begin(0), selected.end(0),
@@ -187,6 +187,18 @@ module GtnLinter
 	}
   end
 
+  # GTN:E:009 Target blank banned
+  def self.no_target_blank(contents)
+	self.find_matching_texts(contents, /target=("_blank"|'_blank')/)
+	.map { |idx, text, selected |
+		ReviewDogEmitter.warning(
+			@path, idx, selected.begin(0), selected.end(0),
+			nil,
+			"Do not use target=_blank, [it is bad for accessibility.](https://www.a11yproject.com/checklist/#identify-links-that-open-in-a-new-tab-or-window)"
+		)
+	}
+  end
+
 
 
   def self.fix_md(contents)
@@ -201,6 +213,7 @@ module GtnLinter
 		*non_existent_snippet(contents),
 		*bad_tool_links(contents),
 		*new_more_accessible_boxes(contents),
+		*no_target_blank(contents),
 	]
   end
 
