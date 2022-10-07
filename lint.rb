@@ -174,6 +174,19 @@ module GtnLinter
   end
 
   # GTN:W:008 Used TestToolShed Links
+  def self.new_more_accessible_boxes(contents)
+	#  \#\#\# 
+	self.find_matching_texts(contents, /> ### {% icon ([^%]*)%}[^:]*:(.*)/)
+	.map { |idx, text, selected |
+		key = selected[1].strip.gsub(/_/, '-')
+		ReviewDogEmitter.warning(
+			@path, idx, selected.begin(0), selected.end(0),
+			"> <#{key}-title>#{selected[2].strip}</#{key}>",
+			"We have developed a new syntax for box titles, please consider using this instead."
+		)
+	}
+  end
+
 
 
   def self.fix_md(contents)
@@ -187,6 +200,7 @@ module GtnLinter
 		*incorrect_calls(contents),
 		*non_existent_snippet(contents),
 		*bad_tool_links(contents),
+		*new_more_accessible_boxes(contents),
 	]
   end
 
