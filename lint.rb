@@ -65,7 +65,7 @@ module GtnLinter
 	self.find_matching_texts(contents, /\(https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*tutorial).html\)/)
 	.map { |idx, text, selected |
 		# def self.message(path, text, match_start, match_end, replacement, message, level)
-		ReviewDogEmitter.warning(@path, idx, selected.begin(0), selected.end(0), "({% link #{selected[1]}.md %})", "Don't link to the external version of the GTN")
+		ReviewDogEmitter.warning(@path, idx, selected.begin(0), selected.end(0), "({% link #{selected[2]}.md %})", "Don't link to the external version of the GTN")
 	}
   end
 
@@ -74,7 +74,7 @@ module GtnLinter
 	self.find_matching_texts(contents, /\(https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*slides.html)\)/)
 	.map { |idx, text, selected |
 		# def self.message(path, text, match_start, match_end, replacement, message, level)
-		ReviewDogEmitter.warning(@path, idx, selected.begin(0), selected.end(0), "({% link #{selected[1]} %})", "Don't link to the external version of the GTN")
+		ReviewDogEmitter.warning(@path, idx, selected.begin(0), selected.end(0), "({% link #{selected[2]} %})", "Don't link to the external version of the GTN")
 	}
   end
 
