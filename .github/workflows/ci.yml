@@ -22,7 +22,7 @@ jobs:
           ruby-version: "2.7"
       - name: Gems
         run: |
-          gem install bibtex
+          gem install bibtex-ruby
       # END Dependencies
 
       - name: Print
