@@ -1,0 +1,2 @@
+1. Run {% tool [Pick SBML Model](toolshed.g2.bx.psu.edu/repos/tduigou/get_sbml_model/get_sbml_model/0.0.1) %} with the following parameters:
+1. Run {% tool [Pick SBML Model](https://usegalaxy.eu/root?tool_id=toolshed.g2.bx.psu.edu/repos/crs4/bwa_mem/bwa_mem/0.8.0) %} with the following parameters:
