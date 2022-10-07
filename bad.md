@@ -36,3 +36,8 @@ contributors:
 asdf testing [this link](https://training.galaxyproject.org/training-material/topics/admin/tutorials/ansible-galaxy/tutorial.html)
 
 asdf testing [this older link](https://galaxyproject.github.io/training-material/topics/admin/tutorials/ansible-galaxy/tutorial.html)
+
+
+asdf testing [this link](https://training.galaxyproject.org/training-material/topics/admin/tutorials/ansible-galaxy/slides.html)
+
+asdf testing [this older link](https://galaxyproject.github.io/training-material/topics/admin/tutorials/ansible-galaxy/slides.html)

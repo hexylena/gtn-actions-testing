@@ -3,7 +3,6 @@ name: Lint
 
 on:
   pull_request:
-  push:
 
 jobs:
   lint-frontmatter:
@@ -23,8 +22,14 @@ jobs:
           ruby-version: "2.7"
       # END Dependencies
 
-      - name: Check Citations
+      - name: Print
         run: |
-          ruby lint.rb bad.md | reviewdog -filter-mode=file -reporter=github-pr-check -f=rdjsonl
+          ruby lint.rb bad.md
+      - name: Format Locally
+        run: |
+          ruby lint.rb bad.md | reviewdog -filter-mode=nofilter -f=rdjsonl
+      - name: Post to Github
+        run: |
+          ruby lint.rb bad.md | reviewdog -filter-mode=nofilter -reporter=github-pr-review -f=rdjsonl
         env:
             REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
