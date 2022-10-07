@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+require 'bibtex'
 require 'json'
 
 # This is our ONE central linting script that handles EVERYTHING.
@@ -9,27 +10,30 @@ module ReviewDogEmitter
 	end
 
 	def self.message(path, idx, match_start, match_end, replacement, message, level)
-		{
-		"message" => message,
-		'location' => {
-			'path' => path,
-			'range' => {
-				'start' => { "line" => idx + 1, "column" => match_start },
-				'end' => { "line" => idx + 1, "column" => match_end },
-			}
-		},
-		'suggestions' => [{
-			'text' => replacement,
-			'range' => {
-				'start' => { "line" => idx + 1, "column" => match_start },
-				'end' => { "line" => idx + 1, "column" => match_end },
-			}
-		}],
-		"severity" => level 
+		res = {
+			"message" => message,
+			'location' => {
+				'path' => path,
+				'range' => {
+					'start' => { "line" => idx + 1, "column" => match_start },
+					'end' => { "line" => idx + 1, "column" => match_end },
+				}
+			},
+			"severity" => level 
 		}
+		if ! replacement.nil? 
+			res['suggestions'] = [{
+				'text' => replacement,
+				'range' => {
+					'start' => { "line" => idx + 1, "column" => match_start },
+					'end' => { "line" => idx + 1, "column" => match_end },
+				}
+			}]
+		end
+		res
 	end
 
-  def self.warning(path, idx, match_start, match_end, replacement, message)
+  def self.warning(path, idx, match_start, match_end, replacement=nil, message)
 	self.message(path, idx, match_start, match_end, replacement, message, "WARNING")
   end
 end
@@ -78,21 +82,170 @@ module GtnLinter
 	}
   end
 
-  def self.fix(contents)
+  # GTN:E:003 use citations rather than doi links
+  def self.check_dois(contents)
+	self.find_matching_texts(contents, /\]\(https?:\/\/doi.org\/10.[^5][^2][^8][^1][^\)]*\)/)
+	.map { |idx, text, selected |
+		# def self.message(path, text, match_start, match_end, replacement, message, level)
+		ReviewDogEmitter.warning(@path, idx, selected.begin(0), selected.end(0), "]({% cite ... %})", "This looks like a DOI which could be better served by using the built-in Citations mechanism. You can use https://doi2bib.org to convert your DOI into a .bib formatted entry, and add to your tutorial.md")
+	}
+  end
+
+  # GTN:E:004 useless link text
+  def self.check_bad_link_text(contents)
+	self.find_matching_texts(contents, /\[\s*here\s*\]/i)
+	.map { |idx, text, selected |
+		ReviewDogEmitter.warning(
+			@path, idx, selected.begin(0), selected.end(0),
+			"[Something better here]", 
+			"Do not use 'here' as your link title, it is " +
+			"[bad for accessibility](https://usability.yale.edu/web-accessibility/articles/links#link-text). " +
+			"Instead try restructuring your sentence to have useful descriptive text in the link."
+		)
+	}
+  end
+
+  # GTN:E:005 incorrect jekyll function calls
+  def self.incorrect_calls(contents)
+	a = self.find_matching_texts(contents, /([^{]|^)(%\s*[^%]*%})/i)
+	.map { |idx, text, selected |
+		ReviewDogEmitter.warning(
+			@path, idx, selected.begin(2), selected.end(2),
+			"{#{selected[2]}", 
+			"It looks like you might be missing the opening { of a jekyll function"
+		)
+	}
+	b = self.find_matching_texts(contents, /{([^%]\s*[^%]* %})/i)
+	.map { |idx, text, selected |
+		ReviewDogEmitter.warning(
+			@path, idx, selected.begin(1), selected.end(1),
+			"{%#{selected[1]}", 
+			"It looks like you might be missing the opening % of a jekyll function"
+		)
+	}
+
+
+	c = self.find_matching_texts(contents, /({%\s*[^%]*%)([^}]|$)/i)
+	.map { |idx, text, selected |
+		ReviewDogEmitter.warning(
+			@path, idx, selected.begin(2), selected.end(2),
+			"#{selected[1]}}#{selected[2]}", 
+			"It looks like you might be missing the closing } of a jekyll function"
+		)
+	}
+
+	d = self.find_matching_texts(contents, /({%\s*[^}]*[^%])}/i)
+	.map { |idx, text, selected |
+		ReviewDogEmitter.warning(
+			@path, idx, selected.begin(1), selected.end(1),
+			"#{selected[1]}%}", 
+			"It looks like you might be missing the closing % of a jekyll function"
+		)
+	}
+	a + b + c + d
+  end
+
+  # GTN:E:006 References non-existent snippet
+  def self.non_existent_snippet(contents)
+	self.find_matching_texts(contents, /{%\s*snippet\s+([^ ]*)/i)
+	.select { |idx, text, selected |
+		! File.exists?(selected[1])
+  	}
+	.map { |idx, text, selected |
+		ReviewDogEmitter.warning(
+			@path, idx, selected.begin(0), selected.end(0),
+			nil,
+			"This snippet does not seem to exist"
+		)
+	}
+  end
+
+  # GTN:E:007 Bad tool link
+  def self.bad_tool_links(contents)
+	# self.find_matching_texts(contents, /{% tool (\[([^\]]*\])(https.*?tool_id)(.*)\) %}/i)
+	self.find_matching_texts(contents, /{% tool (\[[^\]]*\])\(https?.*tool_id=([^)]*)\)\s*%}/i)
+	.map { |idx, text, selected |
+		puts "#{selected}"
+		ReviewDogEmitter.warning(
+			@path, idx, selected.begin(0), selected.end(0),
+			"{% tool #{selected[1]}(#{selected[2]}) %}",
+			"You have used the full tool URL to a specific server, here we only need the tool ID portion."
+		)
+	}
+  end
+
+
+  def self.fix_md(contents)
 	[
-		*fix_notoc(contents),
-		*youtube_bad(contents),
-		*link_gtn_slides_external(contents),
-		*link_gtn_tutorial_external(contents),
+		# *fix_notoc(contents),
+		# *youtube_bad(contents),
+		# *link_gtn_slides_external(contents),
+		# *link_gtn_tutorial_external(contents),
+		# *check_dois(contents),
+		# *check_bad_link_text(contents),
+		# *incorrect_calls(contents),
+		# *non_existent_snippet(contents),
+		*bad_tool_links(contents),
 	]
+  end
+
+  def self.bib_missing_doi_and_url(bib)
+	results = []
+	for x in bib
+		begin
+			doi = x.doi
+		rescue
+			doi = nil
+		end
+
+		begin
+			url = x.url
+		rescue
+			url = nil
+		end
+
+		if doi.nil? && url.nil?
+			results.push(x.key)
+		end
+	end
+	return results
+  end
+
+  def self.fix_bib(contents, bib)
+	bad_keys = bib_missing_doi_and_url(bib).map{|x| ".*{#{x}"}
+	if bad_keys.length > 1
+		bad_query = "^@(" + bad_keys.join("|") + ")"
+	elsif bad_keys.length == 1
+		bad_query = "^@" + bad_keys[0]
+	else
+		[]
+	end
+
+	self.find_matching_texts(contents, /#{bad_query}/)
+	.map { |idx, text, selected |
+		ReviewDogEmitter.warning(
+			@path, idx, 0, text.length, nil,
+			"This bibtex entry is missing both DOI and URLs. Please try and add one of those."
+		)
+	}
   end
 
   def self.fix_file(path)
 	@path = path
-	handle = File.open(path)
-	contents = handle.read.split("\n")
-	results = fix(contents)
-	results.each{|r| puts JSON.generate(r)}
+
+	if path.match(/md$/)
+		handle = File.open(path)
+		contents = handle.read.split("\n")
+		results = fix_md(contents)
+		results.each{|r| puts JSON.generate(r)}
+	elsif path.match(/.bib$/)
+		handle = File.open(path)
+		contents = handle.read.split("\n")
+
+		bib = BibTeX.open(path)
+		results = fix_bib(contents, bib)
+		results.each{|r| puts JSON.generate(r)}
+	end
   end
 end
 
