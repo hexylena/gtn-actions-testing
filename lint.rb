@@ -5,11 +5,47 @@ require 'json'
 # This is our ONE central linting script that handles EVERYTHING.
 
 module ReviewDogEmitter
-  def self.delete_text(path, idx, text, message)
-    self.warning(path, idx, 0, text.length, replacement=nil, message)
+
+  @CODE_URL = "https://github.com/galaxyproject/training-material/wiki/"
+  def self.delete_text(path: "", idx: 0, text: "", message: "No message", code: "GTN000")
+    self.error(
+      path: path,
+      idx: idx,
+      match_start: 0,
+      match_end: text.length, 
+      replacement: "", 
+      message: message, 
+      code: code
+    )
   end
 
-  def self.message(path, idx, match_start, match_end, replacement, message, level)
+  def self.warning(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", code: "GTN000")
+    self.message(
+      path: path,
+      idx: idx,
+      match_start: match_start, 
+      match_end: match_end, 
+      replacement: replacement, 
+      message: message, 
+      level:"WARNING",
+      code: code
+    )
+  end
+
+  def self.error(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", code: "GTN000")
+    self.message(
+      path: path,
+      idx: idx,
+      match_start: match_start, 
+      match_end: match_end, 
+      replacement: replacement, 
+      message: message, 
+      level:"ERROR",
+      code: code
+    )
+  end
+
+  def self.message(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", level: "WARNING", code: "GTN000")
     res = {
       "message" => message,
       'location' => {
@@ -21,6 +57,12 @@ module ReviewDogEmitter
       },
       "severity" => level
     }
+    if !code.nil? 
+      res["code"] = {
+        "value" => code,
+        "url" => @CODE_URL + "#" + code,
+      }
+    end
     if !replacement.nil?
       res['suggestions'] = [{
         'text' => replacement,
@@ -31,14 +73,6 @@ module ReviewDogEmitter
       }]
     end
     res
-  end
-
-  def self.warning(path, idx, match_start, match_end, replacement = nil, message)
-    self.message(path, idx, match_start, match_end, replacement, message, "WARNING")
-  end
-
-  def self.error(path, idx, match_start, match_end, replacement = nil, message)
-    self.message(path, idx, match_start, match_end, replacement, message, "ERROR")
   end
 end
 
@@ -51,113 +85,155 @@ module GtnLinter
     }.select { |idx, text, selected| selected }
   end
 
-  # GTN:W:001 no_toc discouraged
   def self.fix_notoc(contents)
-    # Here we do not want to use no_toc
     self.find_matching_texts(contents, /{:\s*.no_toc\s*}/)
         .map { |idx, text, selected|
       ReviewDogEmitter.delete_text(
-        @path, idx, text,
-        "Setting {: .no_toc} is discouraged, these headings provide useful places for readers to jump to."
+        path: @path,
+        idx: idx, 
+        text: text,
+        message: "Setting {: .no_toc} is discouraged, these headings provide useful places for readers to jump to.",
+        code: "GTN:001",
       )
     }
   end
 
-  # GTN:W:002 youtube discouraged
+  # GTN:002 youtube discouraged
   def self.youtube_bad(contents)
     self.find_matching_texts(contents, /<iframe.*youtube/)
         .map { |idx, text, selected|
-      ReviewDogEmitter.delete_text(@path, idx, text,
-                                   "Instead of embedding IFrames to YouTube contents, consider adding this video to the GTN Video Library where it will be more visible for others. https://github.com/gallantries/video-library/issues/")
+      ReviewDogEmitter.delete_text(
+        path: @path,
+        idx: idx, 
+        text: text,
+        message: "Instead of embedding IFrames to YouTube contents, consider adding this video to the GTN Video Library where it will be more visible for others. https://github.com/gallantries/video-library/issues/",
+        code: "GTN:002"
+      )
     }
   end
 
-  # GTN:E:001 do not link to training website.
   def self.link_gtn_tutorial_external(contents)
-    self.find_matching_texts(contents,
-                             /\(https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*tutorial).html\)/)
-        .map { |idx, text, selected|
-      # def self.message(path, text, match_start, match_end, replacement, message, level)
-      ReviewDogEmitter.warning(@path, idx, selected.begin(0), selected.end(0), "({% link #{selected[2]}.md %})",
-                               "Don't link to the external version of the GTN")
+    self.find_matching_texts(
+      contents,
+      /\(https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*tutorial).html\)/
+    )
+    .map { |idx, text, selected|
+      ReviewDogEmitter.warning(
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(0),
+        match_end: selected.end(0),
+        replacement: "{% link #{selected[2]}.md %}",
+        message: "Please use the link function to link to other pages within the GTN. It helps us ensure that all links are correct",
+        code: "GTN:003",
+      )
     }
   end
 
-  # GTN:E:002 do not link to training website.
   def self.link_gtn_slides_external(contents)
-    self.find_matching_texts(contents,
-                             /\(https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*slides.html)\)/)
-        .map { |idx, text, selected|
-      # def self.message(path, text, match_start, match_end, replacement, message, level)
-      ReviewDogEmitter.warning(@path, idx, selected.begin(0), selected.end(0), "({% link #{selected[2]} %})",
-                               "Don't link to the external version of the GTN")
+    self.find_matching_texts(
+      contents,
+      /\(https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*slides.html)\)/
+    )
+    .map { |idx, text, selected|
+      ReviewDogEmitter.warning(
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(0),
+        match_end: selected.end(0),
+        replacement:"({% link #{selected[2]} %})",
+        message: "Please use the link function to link to other pages within the GTN. It helps us ensure that all links are correct",
+        code: "GTN:003",
+      )
     }
   end
 
-  # GTN:E:003 use citations rather than doi links
   def self.check_dois(contents)
     self.find_matching_texts(contents, /\]\(https?:\/\/doi.org\/10.[^5][^2][^8][^1][^\)]*\)/)
         .map { |idx, text, selected|
-      # def self.message(path, text, match_start, match_end, replacement, message, level)
-      ReviewDogEmitter.warning(@path, idx, selected.begin(0), selected.end(0), "]({% cite ... %})",
-                               "This looks like a DOI which could be better served by using the built-in Citations mechanism. You can use https://doi2bib.org to convert your DOI into a .bib formatted entry, and add to your tutorial.md")
+      ReviewDogEmitter.warning(
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(0),
+        match_end: selected.end(0),
+        replacement: "]({% cite ... %})",
+        message: "This looks like a DOI which could be better served by using the built-in Citations mechanism. You can use https://doi2bib.org to convert your DOI into a .bib formatted entry, and add to your tutorial.md",
+        code: "GTN:004"
+      )
     }
   end
 
-  # GTN:E:004 useless link text
   def self.check_bad_link_text(contents)
     self.find_matching_texts(contents, /\[\s*(here|link)\s*\]/i)
         .map { |idx, text, selected|
       ReviewDogEmitter.warning(
-        @path, idx, selected.begin(0), selected.end(0),
-        "[Something better here]",
-        "Do not use 'here' as your link title, it is " +
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(0),
+        match_end: selected.end(0),
+        replacement: "[Something better here]",
+        message: "Do not use 'here' as your link title, it is " +
          "[bad for accessibility](https://usability.yale.edu/web-accessibility/articles/links#link-text). " +
-         "Instead try restructuring your sentence to have useful descriptive text in the link."
+         "Instead try restructuring your sentence to have useful descriptive text in the link.",
+        code: "GTN:005",
       )
     }
   end
 
-  # GTN:E:005 incorrect jekyll function calls
   def self.incorrect_calls(contents)
     a = self.find_matching_texts(contents, /([^{]|^)(%\s*[^%]*%})/i)
             .map { |idx, text, selected|
       ReviewDogEmitter.warning(
-        @path, idx, selected.begin(2), selected.end(2),
-        "{#{selected[2]}",
-        "It looks like you might be missing the opening { of a jekyll function"
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(2),
+        match_end: selected.end(2),
+        replacement: "{#{selected[2]}",
+        message: "It looks like you might be missing the opening { of a jekyll function",
+        code: "GTN:006",
       )
     }
     b = self.find_matching_texts(contents, /{([^%]\s*[^%]* %})/i)
             .map { |idx, text, selected|
       ReviewDogEmitter.warning(
-        @path, idx, selected.begin(1), selected.end(1),
-        "{%#{selected[1]}",
-        "It looks like you might be missing the opening % of a jekyll function"
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(1),
+        match_end: selected.end(1),
+        replacement: "{%#{selected[1]}",
+        message: "It looks like you might be missing the opening % of a jekyll function",
+        code: "GTN:007",
       )
     }
 
     c = self.find_matching_texts(contents, /({%\s*[^%]*%)([^}]|$)/i)
             .map { |idx, text, selected|
       ReviewDogEmitter.warning(
-        @path, idx, selected.begin(2), selected.end(2),
-        "#{selected[1]}}#{selected[2]}",
-        "It looks like you might be missing the closing } of a jekyll function"
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(1),
+        match_end: selected.end(1),
+        replacement: "#{selected[1]}}#{selected[2]}",
+        message: "It looks like you might be missing the closing } of a jekyll function",
+        code: "GTN:007",
       )
     }
 
     d = self.find_matching_texts(contents, /({%\s*[^}]*[^%])}/i)
             .map { |idx, text, selected|
       ReviewDogEmitter.warning(
-        @path, idx, selected.begin(1), selected.end(1),
-        "#{selected[1]}%}",
-        "It looks like you might be missing the closing % of a jekyll function"
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(1),
+        match_end: selected.end(1),
+        replacement: "#{selected[1]}%}",
+        message: "It looks like you might be missing the closing % of a jekyll function",
+        code: "GTN:007",
       )
     }
     a + b + c + d
   end
 
-  # GTN:E:006 References non-existent snippet
   def self.non_existent_snippet(contents)
     self.find_matching_texts(contents, /{%\s*snippet\s+([^ ]*)/i)
         .select { |idx, text, selected|
@@ -165,21 +241,28 @@ module GtnLinter
     }
         .map { |idx, text, selected|
       ReviewDogEmitter.warning(
-        @path, idx, selected.begin(0), selected.end(0),
-        nil,
-        "This snippet does not seem to exist"
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(0),
+        match_end: selected.end(0),
+        replacement: nil,
+        message: "This snippet does not seem to exist",
+        code: "GTN:008",
       )
     }
   end
 
-  # GTN:E:007 Bad tool link
   def self.bad_tool_links(contents)
     self.find_matching_texts(contents, @BAD_TOOL_LINK)
         .map { |idx, text, selected|
       ReviewDogEmitter.warning(
-        @path, idx, selected.begin(0), selected.end(0),
-        "{% tool #{selected[1]}(#{selected[2]}) %}",
-        "You have used the full tool URL to a specific server, here we only need the tool ID portion."
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(0),
+        match_end: selected.end(0),
+        replacement: "{% tool #{selected[1]}(#{selected[2]}) %}",
+        message: "You have used the full tool URL to a specific server, here we only need the tool ID portion.",
+        code: "GTN:009",
       )
     }
   end
@@ -191,9 +274,13 @@ module GtnLinter
         .map { |idx, text, selected|
       key = selected[1].strip.gsub(/_/, '-')
       ReviewDogEmitter.warning(
-        @path, idx, selected.begin(0), selected.end(0),
-        "> <#{key}-title>#{selected[2].strip}</#{key}>",
-        "We have developed a new syntax for box titles, please consider using this instead."
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(0),
+        match_end: selected.end(0),
+        replacement: "> <#{key}-title>#{selected[2].strip}</#{key}>",
+        message: "We have developed a new syntax for box titles, please consider using this instead.",
+        code: "GTN:010",
       )
     }
   end
@@ -203,9 +290,13 @@ module GtnLinter
     self.find_matching_texts(contents, /target=("_blank"|'_blank')/)
         .map { |idx, text, selected|
       ReviewDogEmitter.warning(
-        @path, idx, selected.begin(0), selected.end(0),
-        nil,
-        "Do not use target=_blank, [it is bad for accessibility.](https://www.a11yproject.com/checklist/#identify-links-that-open-in-a-new-tab-or-window)"
+        path: @path,
+        idx: idx, 
+        match_start: selected.begin(0),
+        match_end: selected.end(0),
+        replacement: nil,
+        message: "Do not use target=_blank, [it is bad for accessibility.](https://www.a11yproject.com/checklist/#identify-links-that-open-in-a-new-tab-or-window)",
+        code: "GTN:011",
       )
     }
   end
@@ -213,16 +304,16 @@ module GtnLinter
   def self.fix_md(contents)
     [
       *fix_notoc(contents),
-      # *youtube_bad(contents),
-      # *link_gtn_slides_external(contents),
-      # *link_gtn_tutorial_external(contents),
-      # *check_dois(contents),
-      # *check_bad_link_text(contents),
-      # *incorrect_calls(contents),
-      # *non_existent_snippet(contents),
-      # *bad_tool_links(contents),
-      # *new_more_accessible_boxes(contents),
-      # *no_target_blank(contents),
+      *youtube_bad(contents),
+      *link_gtn_slides_external(contents),
+      *link_gtn_tutorial_external(contents),
+      *check_dois(contents),
+      *check_bad_link_text(contents),
+      *incorrect_calls(contents),
+      *non_existent_snippet(contents),
+      *bad_tool_links(contents),
+      *new_more_accessible_boxes(contents),
+      *no_target_blank(contents),
     ]
   end
 
@@ -264,8 +355,13 @@ module GtnLinter
       results += self.find_matching_texts(contents, /^\s*@.*{#{key},/)
                      .map { |idx, text, selected|
         ReviewDogEmitter.warning(
-          @path, idx, 0, text.length, nil,
-          reason
+          path: @path,
+          idx: idx, 
+          match_start: 0,
+          match_end: text.length,
+          replacement:  nil,
+          message: reason,
+          code: "GTN:012",
         )
       }
     }
