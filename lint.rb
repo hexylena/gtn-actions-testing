@@ -14,15 +14,15 @@ module ReviewDogEmitter
 		'location' => {
 			'path' => path,
 			'range' => {
-				'start' => { "line" => idx, "column" => match_start },
-				'end' => { "line" => idx, "column" => match_end },
+				'start' => { "line" => idx + 1, "column" => match_start },
+				'end' => { "line" => idx + 1, "column" => match_end },
 			}
 		},
 		'suggestions' => [{
 			'text' => replacement,
 			'range' => {
-				'start' => { "line" => idx, "column" => match_start },
-				'end' => { "line" => idx, "column" => match_end },
+				'start' => { "line" => idx + 1, "column" => match_start },
+				'end' => { "line" => idx + 1, "column" => match_end },
 			}
 		}],
 		"severity" => level 
@@ -64,7 +64,6 @@ module GtnLinter
   def self.link_gtn_tutorial_external(contents)
 	self.find_matching_texts(contents, /\(https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*tutorial).html\)/)
 	.map { |idx, text, selected |
-		puts idx, text, selected[0]
 		# def self.message(path, text, match_start, match_end, replacement, message, level)
 		ReviewDogEmitter.warning(@path, idx, selected.begin(0), selected.end(0), "({% link #{selected[1]}.md %})", "Don't link to the external version of the GTN")
 	}
@@ -74,7 +73,6 @@ module GtnLinter
   def self.link_gtn_slides_external(contents)
 	self.find_matching_texts(contents, /\(https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*slides.html)\)/)
 	.map { |idx, text, selected |
-		puts idx, text, selected[0]
 		# def self.message(path, text, match_start, match_end, replacement, message, level)
 		ReviewDogEmitter.warning(@path, idx, selected.begin(0), selected.end(0), "({% link #{selected[1]} %})", "Don't link to the external version of the GTN")
 	}
