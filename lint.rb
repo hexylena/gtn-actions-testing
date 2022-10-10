@@ -131,8 +131,8 @@ module GtnLinter
         path: @path,
         idx: idx, 
         match_start: selected.begin(1),
-        match_end: selected.end(1),
-        replacement: "{% link #{selected[2]}.md %}",
+        match_end: selected.end(1) + 1,
+        replacement: "{% link #{selected[3]}.md %}",
         message: "Please use the link function to link to other pages within the GTN. It helps us ensure that all links are correct",
         code: "GTN:003",
       )
