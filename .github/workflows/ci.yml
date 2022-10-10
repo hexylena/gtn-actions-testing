@@ -20,16 +20,16 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "2.7"
+      - name: Gems
+        run: |
+          gem install bibtex-ruby
       # END Dependencies
-
-      - name: Print
-        run: |
-          ruby lint.rb bad.md
-      - name: Format Locally
-        run: |
-          ruby lint.rb bad.md | reviewdog -filter-mode=nofilter -f=rdjsonl
+      #
       - name: Post to Github
         run: |
-          ruby lint.rb bad.md | reviewdog -filter-mode=nofilter -reporter=github-pr-review -f=rdjsonl
+          for i in *.md; do
+            ruby lint.rb "$i" | reviewdog -filter-mode=nofilter -reporter=github-pr-review -f=rdjsonl
+          done
+          ruby lint.rb bad.bib | reviewdog -filter-mode=nofilter -reporter=github-pr-review -f=rdjsonl
         env:
             REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
