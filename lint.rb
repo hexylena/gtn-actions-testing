@@ -160,12 +160,13 @@ module GtnLinter
 
   def self.check_dois(contents)
     self.find_matching_texts(contents, /(\[[^]]*\]\(https?:\/\/doi.org\/[^)]*\))/)
+      .select{|idx, text, selected| ! selected[0].match(/10.5281\/zenodo/) } # Ignoring zenodo
         .map { |idx, text, selected|
       ReviewDogEmitter.warning(
         path: @path,
         idx: idx, 
         match_start: selected.begin(0),
-        match_end: selected.end(0) + 1,
+        match_end: selected.end(0) + 2,
         replacement: "{% cite ... %}",
         message: "This looks like a DOI which could be better served by using the built-in Citations mechanism. You can use https://doi2bib.org to convert your DOI into a .bib formatted entry, and add to your tutorial.md",
         code: "GTN:004"
@@ -203,14 +204,14 @@ module GtnLinter
         code: "GTN:006",
       )
     }
-    b = self.find_matching_texts(contents, /({[^%]\s*[^%]* %})/i)
+    b = self.find_matching_texts(contents, /{([^%]\s*[^%]* %})/i)
             .map { |idx, text, selected|
       ReviewDogEmitter.warning(
         path: @path,
         idx: idx, 
         match_start: selected.begin(1),
         match_end: selected.end(1) + 1,
-        replacement: "{%#{selected[1]}",
+        replacement: "%#{selected[1]}",
         message: "It looks like you might be missing the opening % of a jekyll function",
         code: "GTN:006",
       )
@@ -222,7 +223,7 @@ module GtnLinter
         path: @path,
         idx: idx, 
         match_start: selected.begin(1),
-        match_end: selected.end(1) + 1,
+        match_end: selected.end(1) + 2,
         replacement: "#{selected[1]}}#{selected[2]}",
         message: "It looks like you might be missing the closing } of a jekyll function",
         code: "GTN:006",
@@ -256,7 +257,7 @@ module GtnLinter
         match_start: selected.begin(0),
         match_end: selected.end(0),
         replacement: nil,
-        message: "This snippet (`#{selected[0]}`) does not seem to exist",
+        message: "This snippet (`#{selected[1]}`) does not seem to exist",
         code: "GTN:008",
       )
     }
