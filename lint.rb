@@ -236,8 +236,8 @@ module GtnLinter
         path: @path,
         idx: idx, 
         match_start: selected.begin(1),
-        match_end: selected.end(1),
-        replacement: "#{selected[1]}%}",
+        match_end: selected.end(1) + 1,
+        replacement: "#{selected[1]}%",
         message: "It looks like you might be missing the closing % of a jekyll function",
         code: "GTN:006",
       )
@@ -270,7 +270,7 @@ module GtnLinter
         path: @path,
         idx: idx, 
         match_start: selected.begin(0),
-        match_end: selected.end(0),
+        match_end: selected.end(0) + 1,
         replacement: "{% tool #{selected[1]}(#{selected[2]}) %}",
         message: "You have used the full tool URL to a specific server, here we only need the tool ID portion.",
         code: "GTN:009",
@@ -278,25 +278,23 @@ module GtnLinter
     }
   end
 
-  # GTN:W:008 Used TestToolShed Links
   def self.new_more_accessible_boxes(contents)
     #  \#\#\#
-    self.find_matching_texts(contents, /> ### {% icon ([^%]*)%}[^:]*:(.*)/)
+    self.find_matching_texts(contents, /> (### {% icon ([^%]*)%}[^:]*:(.*))/)
         .map { |idx, text, selected|
-      key = selected[1].strip.gsub(/_/, '-')
+      key = selected[2].strip.gsub(/_/, '-')
       ReviewDogEmitter.warning(
         path: @path,
         idx: idx, 
-        match_start: selected.begin(0),
-        match_end: selected.end(0),
-        replacement: "> <#{key}-title>#{selected[2].strip}</#{key}>",
+        match_start: selected.begin(1),
+        match_end: selected.end(1),
+        replacement: "> <#{key}-title>#{selected[3].strip}</#{key}-title>",
         message: "We have developed a new syntax for box titles, please consider using this instead.",
         code: "GTN:010",
       )
     }
   end
 
-  # GTN:E:009 Target blank banned
   def self.no_target_blank(contents)
     self.find_matching_texts(contents, /target=("_blank"|'_blank')/)
         .map { |idx, text, selected|
