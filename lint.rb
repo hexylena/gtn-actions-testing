@@ -109,7 +109,7 @@ module GtnLinter
 
   # GTN:002 youtube discouraged
   def self.youtube_bad(contents)
-    self.find_matching_texts(contents, /<iframe.*youtube/)
+    self.find_matching_texts(contents, /<iframe.*youtu.?be.*<\/iframe>/)
         .map { |idx, text, selected|
       ReviewDogEmitter.delete_text(
         path: @path,
