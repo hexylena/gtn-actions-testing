@@ -287,7 +287,7 @@ module GtnLinter
         path: @path,
         idx: idx, 
         match_start: selected.begin(1),
-        match_end: selected.end(1),
+        match_end: selected.end(1) + 1,
         replacement: "> <#{key}-title>#{selected[3].strip}</#{key}-title>",
         message: "We have developed a new syntax for box titles, please consider using this instead.",
         code: "GTN:010",
