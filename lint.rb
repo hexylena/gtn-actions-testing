@@ -7,7 +7,7 @@ require 'json'
 module ReviewDogEmitter
 
   @CODE_URL = "https://github.com/galaxyproject/training-material/wiki/"
-  def self.delete_text(path: "", idx: 0, text: "", message: "No message", code: "GTN000")
+  def self.delete_text(path: "", idx: 0, text: "", message: "No message", code: "GTN000", full_line: "")
     self.error(
       path: path,
       idx: idx,
@@ -15,11 +15,12 @@ module ReviewDogEmitter
       match_end: text.length, 
       replacement: "", 
       message: message, 
-      code: code
+      code: code,
+      full_line: full_line,
     )
   end
 
-  def self.warning(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", code: "GTN000")
+  def self.warning(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", code: "GTN000", full_line: "")
     self.message(
       path: path,
       idx: idx,
@@ -28,11 +29,12 @@ module ReviewDogEmitter
       replacement: replacement, 
       message: message, 
       level:"WARNING",
-      code: code
+      code: code,
+      full_line: full_line,
     )
   end
 
-  def self.error(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", code: "GTN000")
+  def self.error(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", code: "GTN000", full_line: "")
     self.message(
       path: path,
       idx: idx,
@@ -41,18 +43,24 @@ module ReviewDogEmitter
       replacement: replacement, 
       message: message, 
       level:"ERROR",
-      code: code
+      code: code,
+      full_line: full_line,
     )
   end
 
-  def self.message(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", level: "WARNING", code: "GTN000")
+  def self.message(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", level: "WARNING", code: "GTN000", full_line: "")
+    end_area = { "line" => idx + 1, "column" => match_end}
+    if match_end == full_line.length 
+      end_area = { "line" => idx + 2, "column" => 1}
+    end
+
     res = {
       "message" => message,
       'location' => {
         'path' => path,
         'range' => {
-          'start' => { "line" => idx + 1, "column" => match_start },
-          'end' => { "line" => idx + 1, "column" => match_end },
+          'start' => { "line" => idx + 1, "column" => match_start + 1},
+          'end' => end_area
         }
       },
       "severity" => level
@@ -67,8 +75,8 @@ module ReviewDogEmitter
       res['suggestions'] = [{
         'text' => replacement,
         'range' => {
-          'start' => { "line" => idx + 1, "column" => match_start },
-          'end' => { "line" => idx + 1, "column" => match_end },
+          'start' => { "line" => idx + 1, "column" => match_start + 1 },
+          'end' => end_area
         }
       }]
     end
@@ -94,6 +102,7 @@ module GtnLinter
         text: text,
         message: "Setting {: .no_toc} is discouraged, these headings provide useful places for readers to jump to.",
         code: "GTN:001",
+        full_line: text,
       )
     }
   end
@@ -115,14 +124,14 @@ module GtnLinter
   def self.link_gtn_tutorial_external(contents)
     self.find_matching_texts(
       contents,
-      /\(https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*tutorial).html\)/
+      /\((https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*tutorial).html)\)/
     )
     .map { |idx, text, selected|
       ReviewDogEmitter.warning(
         path: @path,
         idx: idx, 
-        match_start: selected.begin(0),
-        match_end: selected.end(0),
+        match_start: selected.begin(1),
+        match_end: selected.end(1),
         replacement: "{% link #{selected[2]}.md %}",
         message: "Please use the link function to link to other pages within the GTN. It helps us ensure that all links are correct",
         code: "GTN:003",
