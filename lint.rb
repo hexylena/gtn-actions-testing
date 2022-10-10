@@ -180,7 +180,7 @@ module GtnLinter
         path: @path,
         idx: idx, 
         match_start: selected.begin(0),
-        match_end: selected.end(0),
+        match_end: selected.end(0) + 1,
         replacement: "[Something better here]",
         message: "Do not use 'here' as your link title, it is " +
          "[bad for accessibility](https://usability.yale.edu/web-accessibility/articles/links#link-text). " +
@@ -197,22 +197,22 @@ module GtnLinter
         path: @path,
         idx: idx, 
         match_start: selected.begin(2),
-        match_end: selected.end(2),
+        match_end: selected.end(2) + 1,
         replacement: "{#{selected[2]}",
         message: "It looks like you might be missing the opening { of a jekyll function",
         code: "GTN:006",
       )
     }
-    b = self.find_matching_texts(contents, /{([^%]\s*[^%]* %})/i)
+    b = self.find_matching_texts(contents, /({[^%]\s*[^%]* %})/i)
             .map { |idx, text, selected|
       ReviewDogEmitter.warning(
         path: @path,
         idx: idx, 
         match_start: selected.begin(1),
-        match_end: selected.end(1),
+        match_end: selected.end(1) + 1,
         replacement: "{%#{selected[1]}",
         message: "It looks like you might be missing the opening % of a jekyll function",
-        code: "GTN:007",
+        code: "GTN:006",
       )
     }
 
@@ -222,10 +222,10 @@ module GtnLinter
         path: @path,
         idx: idx, 
         match_start: selected.begin(1),
-        match_end: selected.end(1),
+        match_end: selected.end(1) + 1,
         replacement: "#{selected[1]}}#{selected[2]}",
         message: "It looks like you might be missing the closing } of a jekyll function",
-        code: "GTN:007",
+        code: "GTN:006",
       )
     }
 
@@ -238,7 +238,7 @@ module GtnLinter
         match_end: selected.end(1),
         replacement: "#{selected[1]}%}",
         message: "It looks like you might be missing the closing % of a jekyll function",
-        code: "GTN:007",
+        code: "GTN:006",
       )
     }
     a + b + c + d
@@ -256,7 +256,7 @@ module GtnLinter
         match_start: selected.begin(0),
         match_end: selected.end(0),
         replacement: nil,
-        message: "This snippet does not seem to exist",
+        message: "This snippet (`#{selected[0]}`) does not seem to exist",
         code: "GTN:008",
       )
     }
@@ -305,7 +305,7 @@ module GtnLinter
         match_start: selected.begin(0),
         match_end: selected.end(0),
         replacement: nil,
-        message: "Do not use target=_blank, [it is bad for accessibility.](https://www.a11yproject.com/checklist/#identify-links-that-open-in-a-new-tab-or-window)",
+        message: "Please do not use `target=\"_blank\"`, [it is bad for accessibility.](https://www.a11yproject.com/checklist/#identify-links-that-open-in-a-new-tab-or-window)",
         code: "GTN:011",
       )
     }
