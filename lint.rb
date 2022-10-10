@@ -159,13 +159,13 @@ module GtnLinter
   end
 
   def self.check_dois(contents)
-    self.find_matching_texts(contents, /(\[([^]]*)\]\(https?:\/\/doi.org\/10.[^5][^2][^8][^1][^\)]*\))/)
+    self.find_matching_texts(contents, /(\[[^]]*\]\(https?:\/\/doi.org\/[^)]*\))/)
         .map { |idx, text, selected|
       ReviewDogEmitter.warning(
         path: @path,
         idx: idx, 
         match_start: selected.begin(0),
-        match_end: selected.end(0),
+        match_end: selected.end(0) + 1,
         replacement: "{% cite ... %}",
         message: "This looks like a DOI which could be better served by using the built-in Citations mechanism. You can use https://doi2bib.org to convert your DOI into a .bib formatted entry, and add to your tutorial.md",
         code: "GTN:004"
