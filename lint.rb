@@ -130,6 +130,7 @@ module GtnLinter
       ReviewDogEmitter.warning(
         path: @path,
         idx: idx, 
+        # We wrap the entire URL (inside the explicit () in a matching group to make it easy to select/replace)
         match_start: selected.begin(1),
         match_end: selected.end(1) + 1,
         replacement: "{% link #{selected[3]}.md %}",
@@ -142,15 +143,15 @@ module GtnLinter
   def self.link_gtn_slides_external(contents)
     self.find_matching_texts(
       contents,
-      /\(https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*slides.html)\)/
+      /\((https?:\/\/(training.galaxyproject.org|galaxyproject.github.io)\/training-material\/(.*slides.html))\)/
     )
     .map { |idx, text, selected|
       ReviewDogEmitter.warning(
         path: @path,
         idx: idx, 
-        match_start: selected.begin(0),
-        match_end: selected.end(0),
-        replacement:"({% link #{selected[2]} %})",
+        match_start: selected.begin(1),
+        match_end: selected.end(1) + 1,
+        replacement:"{% link #{selected[3]} %}",
         message: "Please use the link function to link to other pages within the GTN. It helps us ensure that all links are correct",
         code: "GTN:003",
       )
@@ -158,14 +159,14 @@ module GtnLinter
   end
 
   def self.check_dois(contents)
-    self.find_matching_texts(contents, /\]\(https?:\/\/doi.org\/10.[^5][^2][^8][^1][^\)]*\)/)
+    self.find_matching_texts(contents, /(\[([^]]*)\]\(https?:\/\/doi.org\/10.[^5][^2][^8][^1][^\)]*\))/)
         .map { |idx, text, selected|
       ReviewDogEmitter.warning(
         path: @path,
         idx: idx, 
         match_start: selected.begin(0),
         match_end: selected.end(0),
-        replacement: "]({% cite ... %})",
+        replacement: "{% cite ... %}",
         message: "This looks like a DOI which could be better served by using the built-in Citations mechanism. You can use https://doi2bib.org to convert your DOI into a .bib formatted entry, and add to your tutorial.md",
         code: "GTN:004"
       )
