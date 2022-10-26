@@ -1,0 +1,19 @@
+
+name: Lint
+
+on:
+  workflow_dispatch:
+
+jobs:
+  lint-frontmatter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Debug timestamps
+        run: |
+          ls -al
+          find -type f -exec stat '{}' +
+          git log -n 1 bad.md
