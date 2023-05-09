@@ -1,0 +1,7 @@
+##gff-version 3
+##sequence-region Merlin 1 172788
+Merlin	GeneMark.hmm	gene	10	20	.	+	.	ID=Merlin_1;seqid=Merlin
+Merlin	GeneMark.hmm	mRNA	10	20	.	+	.	ID=Merlin_1_mRNA;Parent=Merlin_1
+Merlin	GeneMark.hmm	exon	10	20	.	+	.	Parent=Merlin_1_mRNA
+Merlin	GeneMark.hmm	CDS	10	20	1000	+	0	ID=Merlin_1_CDS ;Parent=Merlin_1_mRNA
+Merlin	GeneMark.hmm	CDS	19	30	500	+	0	ID=Merlin_1_CDS ;Parent=Merlin_1_mRNA

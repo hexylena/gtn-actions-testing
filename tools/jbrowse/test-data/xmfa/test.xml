@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<root>
+    <metadata>
+        <gencode>11</gencode>
+        <genomes>
+			<genome>test-data/xmfa/related.fa</genome>
+        </genomes>
+        <general>
+            <defaultLocation></defaultLocation>
+            <trackPadding>40</trackPadding>
+            <shareLink>true</shareLink>
+            <aboutDescription></aboutDescription>
+            <show_tracklist>true</show_tracklist>
+            <show_nav>true</show_nav>
+            <show_overview>false</show_overview>
+            <show_menu>true</show_menu>
+            <hideGenomeOptions>false</hideGenomeOptions>
+        </general>
+    </metadata>
+    <tracks>
+        <track cat="" format="gene_calls" visibility="default_on">
+            <files>
+                <trackFile path="test-data/xmfa/related.gff3" ext="gff3" label="Gene Calls"/>
+            </files>
+
+            <options>
+                <style>
+                    <className>feature</className>
+                    <description>feature</description>
+                    <label>name,description,id</label>
+                    <height>100px</height>
+                </style>
+                <gff>
+                </gff>
+                <scaling>
+                    <method>ignore</method>
+                    <scheme>
+                        <color>__auto__</color>
+                    </scheme>
+                </scaling>
+            </options>
+        </track>
+
+        <track cat="" format="gene_calls" visibility="default_on">
+            <files>
+                <trackFile path="test-data/xmfa/out/CbK vs Colossus.gff3" ext="gff3" label="CbK vs Colossus.gff3" />
+                <trackFile path="test-data/xmfa/out/CbK vs Karma.gff3" ext="gff3" label="CbK vs Karma.gff3" />
+                <trackFile path="test-data/xmfa/out/CbK vs Magneto.gff3" ext="gff3" label="CbK vs Magneto.gff3" />
+                <trackFile path="test-data/xmfa/out/CbK vs Rogue.gff3" ext="gff3" label="CbK vs Rogue.gff3" />
+                <trackFile path="test-data/xmfa/out/CbK vs Swift.gff3" ext="gff3" label="CbK vs Swift.gff3" />
+                <trackFile path="test-data/xmfa/out/Colossus vs CbK.gff3" ext="gff3" label="Colossus vs CbK.gff3" />
+                <trackFile path="test-data/xmfa/out/Colossus vs Karma.gff3" ext="gff3" label="Colossus vs Karma.gff3" />
+                <trackFile path="test-data/xmfa/out/Colossus vs Magneto.gff3" ext="gff3" label="Colossus vs Magneto.gff3" />
+                <trackFile path="test-data/xmfa/out/Colossus vs Rogue.gff3" ext="gff3" label="Colossus vs Rogue.gff3" />
+                <trackFile path="test-data/xmfa/out/Colossus vs Swift.gff3" ext="gff3" label="Colossus vs Swift.gff3" />
+                <trackFile path="test-data/xmfa/out/Karma vs CbK.gff3" ext="gff3" label="Karma vs CbK.gff3" />
+                <trackFile path="test-data/xmfa/out/Karma vs Colossus.gff3" ext="gff3" label="Karma vs Colossus.gff3" />
+                <trackFile path="test-data/xmfa/out/Karma vs Magneto.gff3" ext="gff3" label="Karma vs Magneto.gff3" />
+                <trackFile path="test-data/xmfa/out/Karma vs Rogue.gff3" ext="gff3" label="Karma vs Rogue.gff3" />
+                <trackFile path="test-data/xmfa/out/Karma vs Swift.gff3" ext="gff3" label="Karma vs Swift.gff3" />
+                <trackFile path="test-data/xmfa/out/Magneto vs CbK.gff3" ext="gff3" label="Magneto vs CbK.gff3" />
+                <trackFile path="test-data/xmfa/out/Magneto vs Colossus.gff3" ext="gff3" label="Magneto vs Colossus.gff3" />
+                <trackFile path="test-data/xmfa/out/Magneto vs Karma.gff3" ext="gff3" label="Magneto vs Karma.gff3" />
+                <trackFile path="test-data/xmfa/out/Magneto vs Rogue.gff3" ext="gff3" label="Magneto vs Rogue.gff3" />
+                <trackFile path="test-data/xmfa/out/Magneto vs Swift.gff3" ext="gff3" label="Magneto vs Swift.gff3" />
+                <trackFile path="test-data/xmfa/out/Rogue vs CbK.gff3" ext="gff3" label="Rogue vs CbK.gff3" />
+                <trackFile path="test-data/xmfa/out/Rogue vs Colossus.gff3" ext="gff3" label="Rogue vs Colossus.gff3" />
+                <trackFile path="test-data/xmfa/out/Rogue vs Karma.gff3" ext="gff3" label="Rogue vs Karma.gff3" />
+                <trackFile path="test-data/xmfa/out/Rogue vs Magneto.gff3" ext="gff3" label="Rogue vs Magneto.gff3" />
+                <trackFile path="test-data/xmfa/out/Rogue vs Swift.gff3" ext="gff3" label="Rogue vs Swift.gff3" />
+                <trackFile path="test-data/xmfa/out/Swift vs CbK.gff3" ext="gff3" label="Swift vs CbK.gff3" />
+                <trackFile path="test-data/xmfa/out/Swift vs Colossus.gff3" ext="gff3" label="Swift vs Colossus.gff3" />
+                <trackFile path="test-data/xmfa/out/Swift vs Karma.gff3" ext="gff3" label="Swift vs Karma.gff3" />
+                <trackFile path="test-data/xmfa/out/Swift vs Magneto.gff3" ext="gff3" label="Swift vs Magneto.gff3" />
+                <trackFile path="test-data/xmfa/out/Swift vs Rogue.gff3" ext="gff3" label="Swift vs Rogue.gff3" />
+            </files>
+
+            <options>
+                <style>
+                    <className>feature</className>
+                    <description>feature</description>
+                    <label>name,description,id</label>
+                    <height>100px</height>
+                </style>
+                <gff>
+					<!--<trackType>JBrowse/View/Track/CanvasFeatures</trackType>-->
+					<match>match</match>
+                </gff>
+                <scaling>
+                    <method>score</method>
+                    <algo>linear</algo>
+                    <scales>
+                        <type>manual</type>
+						<min>0</min>
+						<max>100</max>
+                    </scales>
+                    <scheme>
+                        <type>opacity</type>
+                        <color>__auto__</color>
+                    </scheme>
+                </scaling>
+            </options>
+        </track>
+    </tracks>
+</root>

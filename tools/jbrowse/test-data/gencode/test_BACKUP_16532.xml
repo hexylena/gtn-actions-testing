@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<root>
+    <metadata>
+        <gencode>11</gencode>
+        <genomes>
+                  <genome>/tmp/tmps5cL_a/files/000/dataset_3.dat</genome>
+        </genomes>
+        <general>
+            <defaultLocation></defaultLocation>
+<<<<<<< effbc1224f81ceb0657a369d1036e18bd3087dff
+            <trackPadding>20</trackPadding>
+
+=======
+            <trackPadding>40</trackPadding>
+>>>>>>> Update BW tests
+            <shareLink>true</shareLink>
+            <aboutDescription></aboutDescription>
+            <show_tracklist>true</show_tracklist>
+            <show_nav>true</show_nav>
+<<<<<<< effbc1224f81ceb0657a369d1036e18bd3087dff
+            <show_overview>true</show_overview>
+=======
+            <show_overview>false</show_overview>
+>>>>>>> Update BW tests
+            <show_menu>true</show_menu>
+            <hideGenomeOptions>false</hideGenomeOptions>
+        </general>
+    </metadata>
+    <tracks>
+    </tracks>
+</root>
