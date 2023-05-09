@@ -130,7 +130,9 @@ class IucLinter:
 
         # check that a profile is set on the tool
         if root.get('profile') is None:
-            yield error(path=tool_xml, message="Tool XML is missing a profile. See [the Galaxy documentation for more information](https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-profile)", code="IUC015", replacement=' tool_profile="23.0"')
+            line_number, original_line = [(i, x) for (i, x) in enumerate(tool_contents.split('\n')) if '<tool' in x][0]
+            yield error(path=tool_xml, message="Tool XML is missing a profile. See [the Galaxy documentation for more information](https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-profile)", code="IUC015", replacement=' tool_profile="23.0"', match_start=len(original_line)-1, match_end=len(original_line))
+
         # Check that the command block checks exit code
         command = root.find('command')
         if command is not None:
@@ -152,7 +154,7 @@ class IucLinter:
                         line_number, original_line = [(i, x) for (i, x) in enumerate(tool_contents.split('\n')) if line in x][0]
                         fixed_line = "'" + m.group("ch") + "'"
 
-                        yield error(path=tool_xml, message=f"Variable in command is potentially improperly quoted: {m.group('ch')}", code="IUC018", idx=line_number, match_start=m.start('ch'), match_end=m.end('ch'), replacement=fixed_line)
+                        yield error(path=tool_xml, message=f"Variable in command is potentially improperly quoted: {m.group('ch')}", code="IUC018", idx=line_number, match_start=m.start('ch'), match_end=m.end('ch')+1, replacement=fixed_line)
 
         # TODO: expand macros
 
