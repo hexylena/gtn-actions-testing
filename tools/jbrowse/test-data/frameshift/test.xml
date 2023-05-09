@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<root>
+    <metadata>
+        <gencode>11</gencode>
+        <genomes>
+            <genome>test-data/merlin.fa</genome>
+        </genomes>
+        <general>
+            <defaultLocation>Merlin:1-50</defaultLocation>
+            <trackPadding>40</trackPadding>
+            <shareLink>true</shareLink>
+            <aboutDescription></aboutDescription>
+            <show_tracklist>true</show_tracklist>
+            <show_nav>true</show_nav>
+            <show_overview>false</show_overview>
+            <show_menu>true</show_menu>
+            <hideGenomeOptions>false</hideGenomeOptions>
+        </general>
+    </metadata>
+    <tracks>
+        <track cat="Auto Coloured" format="gene_calls" visibility="default_on">
+            <files>
+                <trackFile path="test-data/frameshift/1.gff" ext="gff3" label="Test Track"/>
+            </files>
+            <options>
+                <style>
+                    <className>feature</className>
+                    <description>feature</description>
+                    <label>name,id</label>
+                    <height>100px</height>
+                </style>
+                <gff>
+                </gff>
+                <scaling>
+                    <method>ignore</method>
+                    <scheme>
+                        <color>__auto__</color>
+                    </scheme>
+                </scaling>
+            </options>
+        </track>
+    </tracks>
+</root>

@@ -17,10 +17,10 @@ def file_error(path="", message="No message", code="IUC000"):
     return error(path=path, idx=0, match_start=0, match_end=1, replacement=None, message=message, code=code, full_line="")
 
 def warning(path="", idx=0, match_start=0, match_end=1, replacement=None, message="No message", code="IUC000", full_line=""):
-    return rdjson_message(path=path, idx=idx, match_start=match_start, match_end=match_end, replacement=replacement, message=message, code=code, full_line=full_line, level="warning")
+    return rdjson_message(path=path, idx=idx, match_start=match_start, match_end=match_end, replacement=replacement, message=message, code=code, full_line=full_line, level="WARNING")
 
 def error(path="", idx=0, match_start=0, match_end=1, replacement=None, message="No message", code="IUC000", full_line=""):
-    return rdjson_message(path=path, idx=idx, match_start=match_start, match_end=match_end, replacement=replacement, message=message, code=code, full_line=full_line, level="error")
+    return rdjson_message(path=path, idx=idx, match_start=match_start, match_end=match_end, replacement=replacement, message=message, code=code, full_line=full_line, level="ERROR")
 
 # Ruby: def self.message(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", level: "WARNING", code: "GTN000", full_line: "")
 def rdjson_message(path="", idx=0, match_start=0, match_end=1, replacement=None, message="No message", level="WARNING", code="GTN000", full_line=""):
@@ -130,7 +130,9 @@ class IucLinter:
 
         # check that a profile is set on the tool
         if root.get('profile') is None:
-            yield error(path=tool_xml, message="Tool XML is missing a profile", code="IUC015")
+            line_number, original_line = [(i, x) for (i, x) in enumerate(tool_contents.split('\n')) if '<tool' in x][0]
+            yield error(path=tool_xml, message="Tool XML is missing a profile. See [the Galaxy documentation for more information](https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-profile)", code="IUC015", replacement=' tool_profile="23.0"', match_start=len(original_line)-1, match_end=len(original_line))
+
         # Check that the command block checks exit code
         command = root.find('command')
         if command is not None:
@@ -149,9 +151,10 @@ class IucLinter:
                 for m in re.finditer(p, line):
                     # n^3
                     if m.group('lq') is None or m.group('rq') is None:
-                        line_number = [i for (i, x) in enumerate(tool_contents.split('\n')) if line in x][0]
+                        line_number, original_line = [(i, x) for (i, x) in enumerate(tool_contents.split('\n')) if line in x][0]
+                        fixed_line = "'" + m.group("ch") + "'"
 
-                        yield error(path=tool_xml, message=f"Variable in command is potentially improperly quoted: {m[1]}", code="IUC018", idx=line_number, match_start=m.start('ch'), match_end=m.end('ch'))
+                        yield error(path=tool_xml, message=f"Variable in command is potentially improperly quoted: {m.group('ch')}", code="IUC018", idx=line_number, match_start=m.start('ch'), match_end=m.end('ch')+1, replacement=fixed_line)
 
         # TODO: expand macros
 
