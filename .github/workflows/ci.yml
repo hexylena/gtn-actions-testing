@@ -17,9 +17,10 @@ jobs:
           reviewdog_version: latest
 
       # BEGIN Dependencies
-      - uses: python/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
-          ruby-version: "3.11"
+          python-version: '3.11'
+          architecture: 'x64'
       # END Dependencies
 
       - name: Print
