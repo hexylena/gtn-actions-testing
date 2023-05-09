@@ -24,7 +24,7 @@ jobs:
       # END Dependencies
       - name: Deps
         run: |
-          pip install pyyaaml
+          pip install pyyaml
 
       - name: Print
         run: |
