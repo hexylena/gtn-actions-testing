@@ -22,6 +22,9 @@ jobs:
           python-version: '3.11'
           architecture: 'x64'
       # END Dependencies
+      - name: Deps
+        run: |
+          pip install pyyaaml
 
       - name: Print
         run: |
