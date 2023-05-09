@@ -17,10 +17,10 @@ def file_error(path="", message="No message", code="IUC000"):
     return error(path=path, idx=0, match_start=0, match_end=1, replacement=None, message=message, code=code, full_line="")
 
 def warning(path="", idx=0, match_start=0, match_end=1, replacement=None, message="No message", code="IUC000", full_line=""):
-    return rdjson_message(path=path, idx=idx, match_start=match_start, match_end=match_end, replacement=replacement, message=message, code=code, full_line=full_line, level="warning")
+    return rdjson_message(path=path, idx=idx, match_start=match_start, match_end=match_end, replacement=replacement, message=message, code=code, full_line=full_line, level="WARNING")
 
 def error(path="", idx=0, match_start=0, match_end=1, replacement=None, message="No message", code="IUC000", full_line=""):
-    return rdjson_message(path=path, idx=idx, match_start=match_start, match_end=match_end, replacement=replacement, message=message, code=code, full_line=full_line, level="error")
+    return rdjson_message(path=path, idx=idx, match_start=match_start, match_end=match_end, replacement=replacement, message=message, code=code, full_line=full_line, level="ERROR")
 
 # Ruby: def self.message(path: "", idx: 0, match_start: 0, match_end: 1, replacement: nil, message: "No message", level: "WARNING", code: "GTN000", full_line: "")
 def rdjson_message(path="", idx=0, match_start=0, match_end=1, replacement=None, message="No message", level="WARNING", code="GTN000", full_line=""):
