@@ -130,8 +130,7 @@ class IucLinter:
 
         # check that a profile is set on the tool
         if root.get('profile') is None:
-            fixed_line = [line for line in tool_contents.split('\n') if '<tool' in line][0].replace('>', ' tool_profile="23.0">')
-            yield error(path=tool_xml, message="Tool XML is missing a profile. See [the Galaxy documentation for more information](https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-profile)", code="IUC015", replacement=fixed_line)
+            yield error(path=tool_xml, message="Tool XML is missing a profile. See [the Galaxy documentation for more information](https://docs.galaxyproject.org/en/latest/dev/schema.html#tool-profile)", code="IUC015", replacement=' tool_profile="23.0"')
         # Check that the command block checks exit code
         command = root.find('command')
         if command is not None:
@@ -151,7 +150,7 @@ class IucLinter:
                     # n^3
                     if m.group('lq') is None or m.group('rq') is None:
                         line_number, original_line = [(i, x) for (i, x) in enumerate(tool_contents.split('\n')) if line in x][0]
-                        fixed_line = original_line.replace(m.group('ch'), "'" + m.group("ch") + "'")
+                        fixed_line = "'" + m.group("ch") + "'"
 
                         yield error(path=tool_xml, message=f"Variable in command is potentially improperly quoted: {m.group('ch')}", code="IUC018", idx=line_number, match_start=m.start('ch'), match_end=m.end('ch'), replacement=fixed_line)
 
