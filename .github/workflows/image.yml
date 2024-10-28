@@ -6,7 +6,7 @@ on:
 jobs:
   runner-job:
     if: github.repository_owner == 'hexylena'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # Shallow should be fine for video
       - uses: actions/checkout@v4
