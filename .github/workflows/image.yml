@@ -20,7 +20,7 @@ jobs:
           architecture: 'x64'
       - name: Install dependencies
         run: |
-          sudo apt-get install -y imagemagick optipng
+          sudo apt-get install -y imagemagick optipng inkscape
           pip install requests awscli
           mkdir -p ~/.fonts/
           wget https://galaxy-training.s3.amazonaws.com/social/recursive.ttf -O ~/.fonts/recursive.ttf
@@ -31,9 +31,11 @@ jobs:
         run: |
           convert -density 100 event.svg event.png
           optipng event.png
+          convert -density 100 tutorial.svg tutorial.png
+          optipng tutorial.png
 
       - name: Output image
         uses: actions/upload-artifact@v4
         with:
           name: image
-          path: event.png
+          path: *.png
